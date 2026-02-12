@@ -32,13 +32,17 @@ RUN python -m pip install --upgrade pip setuptools wheel ninja
 RUN pip install --no-cache-dir torch==2.5.1 --index-url https://download.pytorch.org/whl/cu121
 
 # Build context (pruned via .dockerignore)
-# WORKDIR /build # devhj commented out
-WORKDIR /fireants # devhj modified (make the editable install point to a stable source path (/fireants))
+# devhj commented out
+# WORKDIR /build
+# devhj modified (make the editable install point to a stable source path (/fireants))
+WORKDIR /fireants
 COPY . .
 
 # Install the main package into the venv
-# RUN pip install --no-cache-dir . # devhj commented out
-RUN pip install --no-cache-dir -e . # devhj modified (use editable installation)
+# devhj commented out
+# RUN pip install --no-cache-dir .
+# devhj modified (use editable installation)
+RUN pip install --no-cache-dir -e .
 
 # Build and install fused ops into the same venv
 # devhj add comments: currently unchanged, keep fused_ops non-editable
@@ -68,13 +72,14 @@ COPY --from=base /opt/venv /opt/venv
 ENV PATH=/opt/venv/bin:${PATH}
 ENV VIRTUAL_ENV=/opt/venv
 
-# WORKDIR /app # devhj commented out
-# devhj modified start
+# devhj commented out
+# WORKDIR /app
+# devhj modified chunk start
 # Ensure /fireants exists in the runtime image by explicit COPY
 # (Your bind mount (e.g., -v /your/local/fireants:/fireants) will override it during dev, but we keep a copy anyway.)
 COPY --from=base /fireants /fireants
 WORKDIR /fireants
-# devhj modified end
+# devhj modified chunk end
 
 # Default: print versions (override with your own CMD/ENTRYPOINT)
 ENTRYPOINT ["/bin/bash"]
